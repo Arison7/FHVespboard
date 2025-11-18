@@ -29,7 +29,8 @@ static const char *TAG = "mqtt5_wifi";
 // ----------------------
 // Calibration Constants
 // ----------------------
-#define DRY_VOLTAGE     3.3f   // Voltage when sensor is dry (in air)
+#define DRY_VOLTAGE     4.0f   // Voltage when sensor is dry (in air)
+#define WATTERING_THRESHOLD 2.5f   // Voltage when sensor is dry (in air)
 #define WET_VOLTAGE     0.3f   // Voltage when sensor is in water
 #define TIME_TO_STOP  10000    // Time the motor stays on in ms (10s rn)
 
@@ -100,11 +101,11 @@ void realse_motor(esp_mqtt_client_handle_t client) {
     ESP_LOGI(SENSOR, "Starting the motor");
     esp_mqtt_client_publish(client, "/topic/test", "Starting the motor", 0, 1, 0);
     // Start the motor
-    gpio_set_level(RELAY_GPIO, 1);
+    gpio_set_level(RELAY_GPIO, 0);
     // Give water time to flow 
     vTaskDelay(pdMS_TO_TICKS(TIME_TO_STOP)); // wait 10 seconds
     // Stop the motor
-    gpio_set_level(RELAY_GPIO, 0);
+    gpio_set_level(RELAY_GPIO, 1);
     ESP_LOGI(SENSOR, "Stopping the motor");
     esp_mqtt_client_publish(client, "/topic/test", "Stopping the motor", 0, 1, 0);
 
@@ -157,7 +158,7 @@ void app_main(void)
     {
         humidity(client);
         vTaskDelay(pdMS_TO_TICKS(2000)); // wait 2 seconds
-        gpio_set_level(RELAY_GPIO, 0);
+        gpio_set_level(RELAY_GPIO, 1);
         vTaskDelay(pdMS_TO_TICKS(2000)); // wait 2 seconds
 
     }
